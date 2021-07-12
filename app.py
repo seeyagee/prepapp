@@ -3,9 +3,21 @@ import pandas as pd
 import numpy as np
 
 
-# st.title('Предложные конструкции в русском языке')
+st.title('Предложные конструкции в русском языке')
+st.write('Место для вступительного слова по проекту')
+
+df = pd.read_csv('static/prep_phrases_gold.csv.zip', compression='zip')
+
+all_preps = sorted(df.prep.unique(), key=len)
 # st.write('')
-# df = pd.read_csv('static/prep_phrases_gold.csv.zip', compression='zip')
+prep = st.selectbox(
+	'Выберите предлог, чтобы узнать больше',
+	['']+all_preps)
+
+if prep:
+	st.write(f'You selected {prep}')
+
+
 # df = df[['phrase', 'label']]
 
 # # st.write("## Data", df)
@@ -26,9 +38,9 @@ import numpy as np
 # st.write('You selected:', options)
 
 
-if st.checkbox('Show dataframe'):
-    chart_data = pd.DataFrame(
-       np.random.randn(20, 3),
-       columns=['a', 'b', 'c'])
+# if st.checkbox('Show dataframe'):
+#     chart_data = pd.DataFrame(
+#        np.random.randn(20, 3),
+#        columns=['a', 'b', 'c'])
 
-    chart_data
+#     chart_data
