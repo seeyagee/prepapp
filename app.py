@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import utils
+import matplotlib.pyplot as plt
 
 
 st.title('Предложные конструкции в русском языке')
@@ -21,6 +22,7 @@ if not prep:
 
 prep_df = synt_df[synt_df.prep == prep]
 prep_labels = sorted(prep_df.label.unique())
+
 
 st.markdown(f'#### Значения предлога *{prep.upper()}*:')
 for l in prep_labels:
@@ -45,5 +47,39 @@ label = st.selectbox(
     [''] + prep_labels) 
 
 if label:
-    st.write(f'{label}')
+    pl_df = phras_df[(phras_df.label == label.lower()) & (phras_df.prep == prep)]
+    hosts = pl_df.host_lemma.value_counts().head(10)
+    dependants = pl_df.dependant_lemma.value_counts().head(10)
+    
+    if st.checkbox('Показать основных хозяев'):
+        hosts_fig = utils.show_hbar(
+            hosts.index,
+            hosts.values,
+            title='Относительная частота хозяев синтаксемы')
+        st.write(hosts_fig)
+
+    if st.checkbox('Показать основных слуг'):
+        deps_fig = utils.show_hbar(
+            dependants.index,
+            dependants.values,
+            title='Относительная частота слуг синтаксемы')
+        st.write(deps_fig)
+
+
+# fig, ax = plt.subplots()
+
+# # Example data
+# people = ('Tom', 'Dick', 'Harry', 'Slim', 'Jim')
+# y_pos = np.arange(len(people))
+# performance = 3 + 10 * np.random.rand(len(people))
+# error = np.random.rand(len(people))
+
+# ax.barh(y_pos, performance, xerr=error, align='center')
+# ax.set_yticks(y_pos)
+# ax.set_yticklabels(people)
+# ax.invert_yaxis()  # labels read top-to-bottom
+# ax.set_xlabel('Performance')
+# ax.set_title('How fast do you want to go today?')
+
+# st.write(fig)
 
