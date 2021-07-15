@@ -127,7 +127,7 @@ venv.bak/
 .mypy_cache/
 
 # jupyter
-.ipynb
+*.ipynb
 
 .dmypy.json
 dmypy.json

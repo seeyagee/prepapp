@@ -63,6 +63,7 @@ if prep:
                 title='Относительная частота слуг синтаксемы')
             st.write(deps_fig)
 
+st.header(':mag_right:')
 with st.beta_expander('Сформировать запрос в банк предложных конструкций:'):
     query = {}
 
