@@ -26,7 +26,7 @@ def get_table_download_button(df, filename, linktext):
 
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
-    href = f'<a href="data:file/csv;base64,{b64}" id="b0" download="{filename}">{linktext}</a><br></br>'
+    href = f'<a href="data:file/csv;base64,{b64}" id="b0" download="{filename}">&#128190  {linktext}</a><br></br>'
 
     custom_css = f""" 
         <style>

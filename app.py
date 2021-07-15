@@ -63,7 +63,6 @@ if prep:
                 title='Относительная частота слуг синтаксемы')
             st.write(deps_fig)
 
-
 with st.beta_expander('Сформировать запрос в банк предложных конструкций:'):
     query = {}
 
@@ -77,7 +76,7 @@ with st.beta_expander('Сформировать запрос в банк пре�
                     col,
                     phras_df[col].unique().tolist())
     
-    if st.checkbox('Submit'):
+    if st.checkbox('Показать таблицу'):
 
         query  = ' and '.join(
             f'{key} in {val}' for key, val in query.items()
