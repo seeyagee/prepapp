@@ -22,6 +22,7 @@ def show_hbar(names, values, title, kind='relative'):
 
     return fig
 
+
 def get_table_download_button(df, filename, linktext):
 
     csv = df.to_csv(index=False)

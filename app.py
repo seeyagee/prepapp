@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import utils
-import matplotlib.pyplot as plt
 
 
 st.title('Предложные конструкции в русском языке')
@@ -39,7 +37,6 @@ if prep:
                 for ex in row.examples.split(','):
                     st.write(f'*{ex.strip()}*\n')
 
-
     label = st.selectbox(
         'Выберите значение',
         [''] + prep_labels) 
@@ -63,13 +60,14 @@ if prep:
                 title='Относительная частота слуг синтаксемы')
             st.write(deps_fig)
 
+
 st.header(':mag_right:')
 with st.beta_expander('Сформировать запрос в банк предложных конструкций:'):
     query = {}
 
     query_values = (
         'prep', 'host_lemma', 'dependant_lemma',
-        'dependant_case', 'host_pos', 'dependant_pos')
+        'dependant_case', 'host_pos', 'dependant_pos', 'label')
 
     for col in query_values:
 
@@ -83,9 +81,8 @@ with st.beta_expander('Сформировать запрос в банк пре�
             f'{key} in {val}' for key, val in query.items()
             if len(val))
         out_df = phras_df.query(query) if query else phras_df
-        st.write(out_df)
+        st.write(out_df[['phrase', 'label', 'host_lemma', 'prep', 'dependant_lemma']])
 
-        # if st.button('Скачать таблицу в формате CSV'):
         tmp_link = utils.get_table_download_button(
             out_df,
             'prep_phrases_query.csv',
