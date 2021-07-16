@@ -1,16 +1,20 @@
 import streamlit as st
 import pandas as pd
 import utils
+import pphrase
 
 
 st.title('Предложные конструкции в русском языке')
 st.write('Место для вступительного слова по проекту')
 
-phras_df = pd.read_csv('static/prep_phrases_gold.csv')
-synt_df = pd.read_csv('static/syntaxemes.csv')
+phras_df = pd.read_csv(
+    'static/prep_phrases_gold.csv')
+synt_df = pd.read_csv(
+    'static/syntaxemes.csv')
 
 all_preps = sorted(phras_df.prep.unique(), key=len)
 
+st.header(':book:')
 prep = st.selectbox(
     'Выберите предлог, чтобы узнать больше',
     ['']+all_preps)
@@ -81,10 +85,23 @@ with st.beta_expander('Сформировать запрос в банк пре�
             f'{key} in {val}' for key, val in query.items()
             if len(val))
         out_df = phras_df.query(query) if query else phras_df
-        st.write(out_df[['phrase', 'label', 'host_lemma', 'prep', 'dependant_lemma']])
+        st.write(out_df[['phrase', 'label', 'host', 'prep', 'dependant']])
 
         tmp_link = utils.get_table_download_button(
             out_df,
             'prep_phrases_query.csv',
             'Cкачать')
         st.markdown(tmp_link, unsafe_allow_html=True)
+
+
+extractor = pphrase.Extractor(
+    model='static/russian-syntagrus-ud-2.5-191206.udpipe')
+classifier = pphrase.Classifier(
+    model='static/classifier.pkl',
+    vectorizer='static/ft_freqprune_100K_20K_pq_100.bin')
+
+st.header(':pencil:')
+text = st.text_area('Извлечь конструкции из текста:')
+if text:
+    constructions = extractor.extract(text)
+    st.write(constructions)

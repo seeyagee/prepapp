@@ -2,3 +2,6 @@ streamlit
 pandas
 numpy
 matplotlib
+ufal.udpipe
+compress-fasttext
+networkx
