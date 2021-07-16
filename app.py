@@ -4,13 +4,27 @@ import utils
 import models
 
 
+@st.cache(allow_output_mutation=True)
+def load_models():
+    extractor = models.Extractor(
+        model='ru_core_news_sm')
+    classifier = models.Classifier(
+        model='static/classifier.pkl',
+        vectorizer='static/ft_freqprune_100K_20K_pq_100.bin')
+    return extractor, classifier
+
+@st.cache()
+def load_data():
+    phras_df = pd.read_csv(
+    'static/prep_phrases_gold.csv')
+    synt_df = pd.read_csv(
+    'static/syntaxemes.csv')
+    return phras_df, synt_df
+
 st.title('Предложные конструкции в русском языке')
 st.write('Место для вступительного слова по проекту')
 
-phras_df = pd.read_csv(
-    'static/prep_phrases_gold.csv')
-synt_df = pd.read_csv(
-    'static/syntaxemes.csv')
+phras_df, synt_df = load_data()
 
 all_preps = sorted(phras_df.prep.unique(), key=len)
 
@@ -96,10 +110,7 @@ with st.beta_expander('Сформировать запрос в банк пре�
 st.header(':pencil:')
 text = st.text_area('Извлечь конструкции из текста:')
 
-extractor = models.Extractor()
-classifier = models.Classifier(
-    model='static/classifier.pkl',
-    vectorizer='static/ft_freqprune_100K_20K_pq_100.bin')
+extractor, classifier = load_models()
 
 if text:
     pphrase_gen = extractor.parse(text)
