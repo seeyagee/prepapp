@@ -59,3 +59,14 @@ def get_table_download_button(df, filename, linktext):
 
 
     return custom_css + href
+
+
+def preprocess(data: dict, dummy='что-то_NOUN'):
+
+    if data['host_lemma'] is None:
+        host = dummy
+    else:
+        host = data['host_lemma'] + '_' + data['host_pos']
+    prep = '_'.join(data['prep'].split()) + '_' + data['dependant_morph'].get('Case')[0]
+    dep = data['dependant_lemma'] + '_' + data['dependant_pos']
+    return ' '.join([host, prep, dep])

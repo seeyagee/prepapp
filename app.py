@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import utils
-import pphrase
+import models
 
 
 st.title('Предложные конструкции в русском языке')
@@ -93,15 +93,24 @@ with st.beta_expander('Сформировать запрос в банк пре�
             'Cкачать')
         st.markdown(tmp_link, unsafe_allow_html=True)
 
+st.header(':pencil:')
+text = st.text_area('Извлечь конструкции из текста:')
 
-extractor = pphrase.Extractor(
-    model='static/russian-syntagrus-ud-2.5-191206.udpipe')
-classifier = pphrase.Classifier(
+extractor = models.Extractor()
+classifier = models.Classifier(
     model='static/classifier.pkl',
     vectorizer='static/ft_freqprune_100K_20K_pq_100.bin')
 
-st.header(':pencil:')
-text = st.text_area('Извлечь конструкции из текста:')
 if text:
-    constructions = extractor.extract(text)
-    st.write(constructions)
+    pphrase_gen = extractor.parse(text)
+    for elem in pphrase_gen:
+        text = utils.preprocess(elem)
+        label = classifier.predict(text)[0]
+
+        pphrase = elem['prep'].lower() + ' ' + elem['dependant']
+        if elem['host'] is not None:
+            pphrase = elem['host'] + ' ' + pphrase
+
+        pphrase = (pphrase[:1].upper() + pphrase[1:]).strip()
+        
+        st.write(pphrase, '-----', label)

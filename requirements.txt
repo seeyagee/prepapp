@@ -2,7 +2,6 @@ streamlit
 pandas
 numpy
 matplotlib
-ufal.udpipe
+spacy
 compress-fasttext
-networkx
 sklearn
