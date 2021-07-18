@@ -107,6 +107,7 @@ with st.beta_expander('Сформировать запрос в банк пре�
             'Cкачать')
         st.markdown(tmp_link, unsafe_allow_html=True)
 
+
 st.header(':pencil:')
 text = st.text_area('Извлечь конструкции из текста:')
 

@@ -19,8 +19,7 @@ class Extractor():
         doc = self.nlp(text)
 
         for tok in doc:
-            if tok.pos_ == 'ADP':
-
+            if tok.pos_ == 'ADP' and tok.dep_ != 'fixed':
                 pphrase = []
                 pphrase_data = dict.fromkeys(self.data_fields)
 
@@ -31,6 +30,10 @@ class Extractor():
                 pphrase_data['prep'] = ' '.join([t.text for t in prep])
 
                 dep = tok.head
+                
+                if dep == tok or not dep.morph.get('Case'):
+                    continue
+                
                 full_dep = [dep] + [t for t in dep.children 
                         if t not in prep
                         and t != dep.head]
