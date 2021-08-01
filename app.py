@@ -21,25 +21,23 @@ def load_data():
             'static/prep_phrases_gold.csv')
     synt_df = pd.read_csv(
             'static/syntaxemes.csv')
-    prep_variants = json.loads(
-            open('static/variants.json').read())
+    base_prep = json.loads(
+            open('static/base_prep.json').read())
     label_definitions = json.loads(
             open('static/definitions.json').read())
-    motive_words = json.loads(
-            open('static/motive.json').read())
-    return phras_df, synt_df, prep_variants, label_definitions, motive_words
+    return phras_df, synt_df, label_definitions, base_prep
 
 st.title('Предложные конструкции в русском языке')
 st.write('Место для вступительного слова по проекту')
 
-phras_df, synt_df, prep_variants, label_definitions, motive_words = load_data()
+phras_df, synt_df, label_definitions, base_prep = load_data()
 
-all_preps = sorted(phras_df.prep.unique(), key=len)
+all_preps = sorted(base_prep.keys(), key=len)
 
 st.header(':book:')
 prep = st.selectbox(
     'Выберите предлог, чтобы узнать больше',
-    all_preps)
+    ['']+all_preps)
 
 if prep:
     prep_df = synt_df[synt_df.prep == prep]
@@ -48,20 +46,21 @@ if prep:
     st.markdown(f"""
             ##\n## __Паспорт предлога__ `{prep.upper()}`\n##""")
 
-    if prep in prep_variants:
+    if base_prep[prep]['variants']:
         st.markdown(f"""
                 __Варианты:__ {", ".join(
-                    [f'`{p.upper()}`' for p in  prep_variants[prep]])+hrule}""")
+                    [f'`{p.upper()}`' for p in  base_prep[prep]['variants']])+hrule}""")
 
     st.markdown(f"""
             __Падежи:__ {", ".join(
-                    [f'`{c}`' for c in prep_df.case.unique()])+hrule}""")
+                    [f'`{c}`' for c in base_prep[prep]['case']])+hrule}""")
 
     st.markdown(f"""
             __Значения:__{", ".join(
                     [f'`{l}`' for l in prep_df.label.unique()])}\n##""")
     if len(prep_df):
-        if st.checkbox('Подробнее о значениях'):
+        if st.checkbox(
+                'Подробнее о значениях'):
             for l in prep_labels:
                 with st.beta_expander(f'{l}'):
 
@@ -70,16 +69,19 @@ if prep:
 
                     for d in definitions:
                         st.write(f'- {d.capitalize()}')
-                    st.write('###\n## Примеры: ')
+                    st.write(
+                        '###\n## Примеры: ')
 
                     for _, row in short_df.iterrows():
-                        st.write(f'### {row.case} падеж:')
+                        st.write(
+                            f'### {row.case} падеж:')
 
                         for ex in row.examples.split(','):
                             st.write(f'*{ex.strip()}*\n')
-    if prep in motive_words:
+
+    if 'motive' in base_prep[prep]:
         st.markdown(f"""
-                    {hrule}\n__Мотивирующее слово__: `{motive_words[prep]}`""")
+                {hrule}\n__Мотивирующее слово__: `{base_prep[prep]['motive']}`""")
 
 
 
