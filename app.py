@@ -25,12 +25,14 @@ def load_data():
             open('static/variants.json').read())
     label_definitions = json.loads(
             open('static/definitions.json').read())
-    return phras_df, synt_df, prep_variants, label_definitions
+    motive_words = json.loads(
+            open('static/motive.json').read())
+    return phras_df, synt_df, prep_variants, label_definitions, motive_words
 
 st.title('Предложные конструкции в русском языке')
 st.write('Место для вступительного слова по проекту')
 
-phras_df, synt_df, prep_variants, label_definitions = load_data()
+phras_df, synt_df, prep_variants, label_definitions, motive_words = load_data()
 
 all_preps = sorted(phras_df.prep.unique(), key=len)
 
@@ -57,24 +59,30 @@ if prep:
 
     st.markdown(f"""
             __Значения:__{", ".join(
-                    [f'`{l}`' for l in prep_df.label.unique()])+hrule}""")
+                    [f'`{l}`' for l in prep_df.label.unique()])}\n##""")
+    if len(prep_df):
+        if st.checkbox('Подробнее о значениях'):
+            for l in prep_labels:
+                with st.beta_expander(f'{l}'):
 
-    if st.checkbox('Подробнее о значениях'):
-        for l in prep_labels:
-            with st.beta_expander(f'{l}'):
+                    short_df = synt_df[(synt_df.prep == prep) & (synt_df.label == l)]
+                    definitions = label_definitions[l].split(';')
 
-                short_df = synt_df[(synt_df.prep == prep) & (synt_df.label == l)]
-                definitions = label_definitions[l].split(';')
+                    for d in definitions:
+                        st.write(f'- {d.capitalize()}')
+                    st.write('###\n## Примеры: ')
 
-                for d in definitions:
-                    st.write(f'- {d.capitalize()}')
-                st.write('###\n## Примеры: ')
+                    for _, row in short_df.iterrows():
+                        st.write(f'### {row.case} падеж:')
 
-                for _, row in short_df.iterrows():
-                    st.write(f'### {row.case} падеж:')
+                        for ex in row.examples.split(','):
+                            st.write(f'*{ex.strip()}*\n')
+    if prep in motive_words:
+        st.markdown(f"""
+                    {hrule}\n__Мотивирующее слово__: `{motive_words[prep]}`""")
 
-                    for ex in row.examples.split(','):
-                        st.write(f'*{ex.strip()}*\n')
+
+
 
     # label = st.selectbox(
     #     'Выберите значение',
