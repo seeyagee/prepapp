@@ -15,7 +15,7 @@ class Extractor():
             'host_morph', 'host_lemma', 'host_pos')
 
     def parse(self, text):
-        
+
         doc = self.nlp(text)
 
         for tok in doc:

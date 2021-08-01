@@ -5,6 +5,8 @@ import re
 import uuid
 
 
+hrule = '\n_________________'
+
 def show_hbar(names, values, title, kind='relative'):
 
     if kind == 'relative':
