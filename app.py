@@ -158,6 +158,8 @@ if text:
         # needs model retraining to remove this hack
         if label == 'каузатор':
             label = 'каузатив'
+        elif label == 'квалитатив':
+        	label = 'квалификатив'
 
         pphrase = elem['prep'].lower() + ' ' + elem['dependant']
         if elem['host'] is not None:
