@@ -115,8 +115,8 @@ with st.beta_expander('Сформировать запрос в банк пре�
     query = {}
 
     query_values = (
-        'prep', 'host_lemma', 'dependant_lemma',
-        'dependant_case', 'host_pos', 'dependant_pos', 'label')
+        'prep', 'label', 'dependant_lemma', 'dependant_case', 'dependant_pos',
+        'host_lemma', 'host_pos')
 
     for col in query_values:
 
