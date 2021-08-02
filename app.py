@@ -111,12 +111,13 @@ if prep:
 
 
 st.header(':mag_right:')
-with st.beta_expander('Сформировать запрос в банк предложных конструкций:'):
+with st.beta_expander(
+            'Сформировать запрос в банк предложных конструкций:'):
     query = {}
 
     query_values = (
-        'prep', 'label', 'dependant_lemma', 'dependant_case', 'dependant_pos',
-        'host_lemma', 'host_pos')
+        'prep', 'label', 'dependant_lemma', 'dependant_case',
+        'dependant_pos', 'host_lemma', 'host_pos')
 
     for col in query_values:
 
@@ -124,7 +125,8 @@ with st.beta_expander('Сформировать запрос в банк пре�
                     col,
                     sorted(phras_df[col].unique().tolist()))
     
-    if st.checkbox('Показать таблицу'):
+    if st.checkbox(
+            'Показать таблицу'):
 
         query  = ' and '.join(
             f'{key} in {val}' for key, val in query.items()
@@ -140,23 +142,26 @@ with st.beta_expander('Сформировать запрос в банк пре�
 
 
 st.header(':pencil:')
-text = st.text_area('Извлечь конструкции из текста:')
+text = st.text_area(label='Извлечь конструкции из текста:',
+                    max_chars=400,
+                    help='Введите текст. Например, "Мероприятие в честь выпуска выпадает на субботу"')
 
 extractor, classifier = load_models()
 
 if text:
     pphrase_gen = extractor.parse(text)
+    st.markdown('#### Найденные конструкции:')
     for elem in pphrase_gen:
         text = utils.preprocess(elem)
         label = classifier.predict(text)[0]
 
+        # needs model retraining to remove this hack
+        if label == 'каузатор':
+            label = 'каузатив'
+
         pphrase = elem['prep'].lower() + ' ' + elem['dependant']
         if elem['host'] is not None:
             pphrase = elem['host'] + ' ' + pphrase
-
         pphrase = (pphrase[:1].upper() + pphrase[1:]).strip()
         
-        st.write(pphrase, '-----', label)
-
-
-# st.title('this is a title', 'this is its anchor text')
+        st.markdown(f"{pphrase} ⸻ `{label}`")
