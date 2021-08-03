@@ -47,9 +47,13 @@ if prep:
             ##\n## __Паспорт предлога__ `{prep.upper()}`\n##""")
 
     if base_prep[prep]['variants']:
+
         st.markdown(f"""
                 __Варианты:__ {", ".join(
                     [f'`{p.upper()}`' for p in  base_prep[prep]['variants']])+hrule}""")
+
+    st.markdown(f"""
+            __Тип__: `{base_prep[prep]['kind']}`{hrule}""")
 
     st.markdown(f"""
             __Падежи:__ {", ".join(
@@ -58,6 +62,7 @@ if prep:
     st.markdown(f"""
             __Значения:__{", ".join(
                     [f'`{l}`' for l in prep_df.label.unique()])}\n##""")
+
     if len(prep_df):
         if st.checkbox(
                 'Подробнее о значениях'):
