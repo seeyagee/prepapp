@@ -88,9 +88,6 @@ if prep:
         st.markdown(f"""
                 {hrule}\n__Мотивирующее слово__: `{base_prep[prep]['motive']}`""")
 
-
-
-
     # label = st.selectbox(
     #     'Выберите значение',
     #     [''] + prep_labels)
@@ -147,24 +144,24 @@ with st.beta_expander(
 
 
 st.header(':pencil:')
-text = st.text_area(label='Извлечь конструкции из текста:',
+text = st.text_area(label='Извлечь конструкции из своего текста:',
                     max_chars=400,
                     help='Введите текст. Например, "Мероприятие в честь выпуска выпадает на субботу"')
 
 extractor, classifier = load_models()
 
-if text:
+if st.button('Извлечь') or text:
     pphrase_gen = extractor.parse(text)
     st.markdown('#### Найденные конструкции:')
     for elem in pphrase_gen:
         text = utils.preprocess(elem)
         label = classifier.predict(text)[0]
 
-        # needs model retraining to remove this hack
+        # TODO needs model retraining to remove this hack
         if label == 'каузатор':
             label = 'каузатив'
         elif label == 'квалитатив':
-        	label = 'квалификатив'
+            label = 'квалификатив'
 
         pphrase = elem['prep'].lower() + ' ' + elem['dependant']
         if elem['host'] is not None:
