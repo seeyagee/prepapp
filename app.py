@@ -111,7 +111,17 @@ if prep:
                             `{row['prep_2'].upper()}` + `{row['case_2'].capitalize()}` ⸻ \
                             `{row['prep_1'].upper()}` + `{row['case_1'].capitalize()}`""")
 
+    if len(base_prep[prep]['idiom']):
+        st.markdown(f"""
+                    {hrule}\n__Идиомы__:\n\n""")
+        with st.beta_expander(f'Показать идиомы:'):
+            for idiom in base_prep[prep]['idiom']:
+                st.markdown(f'- {idiom.capitalize()}')
 
+    st.markdown(f"""
+            {hrule}\n__Источники:__\n\n""")
+    for source in base_prep[prep]['source']:
+        st.markdown(f'- {source}')
 
 
 st.header(':mag_right:')
