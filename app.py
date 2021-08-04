@@ -25,12 +25,18 @@ def load_data():
             open('static/base_prep.json').read())
     label_definitions = json.loads(
             open('static/definitions.json').read())
-    return phras_df, synt_df, label_definitions, base_prep
+    semantic_df = {
+            'Синонимы': pd.read_csv(
+                'static/synonyms.csv'),
+            'Антонимы': pd.read_csv(
+                'static/antonyms.csv')}
+    return phras_df, synt_df, label_definitions, \
+           base_prep, semantic_df
 
 st.title('Предложные конструкции в русском языке')
 st.write('Место для вступительного слова по проекту')
 
-phras_df, synt_df, label_definitions, base_prep = load_data()
+phras_df, synt_df, label_definitions, base_prep, semantic_df = load_data()
 
 all_preps = sorted(base_prep.keys(), key=len)
 
@@ -88,28 +94,24 @@ if prep:
         st.markdown(f"""
                 {hrule}\n__Мотивирующее слово__: `{base_prep[prep]['motive']}`""")
 
-    # label = st.selectbox(
-    #     'Выберите значение',
-    #     [''] + prep_labels)
 
-    # if label:
-    #     pl_df = phras_df[(phras_df.label == label.lower()) & (phras_df.prep == prep)]
-    #     hosts = pl_df.host_lemma.value_counts().head(10)
-    #     dependants = pl_df.dependant_lemma.value_counts().head(10)
-        
-    #     if st.checkbox('Показать хозяев'):
-    #         hosts_fig = utils.show_hbar(
-    #             hosts.index,
-    #             hosts.values,
-    #             title='Относительная частота хозяев синтаксемы')
-    #         st.write(hosts_fig)
+    for ent in 'Синонимы', 'Антонимы':
+        df = semantic_df[ent]
+        df = df[df['prep_1'] == prep]
+        if len(df):
+            st.markdown(f"""
+                    {hrule}\n__{ent}__:\n\n""")
+            with st.beta_expander(f'Показать {ent.lower()}:'):
+                for label in df.label.unique():
+                    sem_group = df[df.label == label]
+                    st.markdown(f"""
+                            \n- __{label}__\n""")
+                    for _, row in sem_group.iterrows():
+                        st.markdown(f"""
+                            `{row['prep_2'].upper()}` + `{row['case_2'].capitalize()}` ⸻ \
+                            `{row['prep_1'].upper()}` + `{row['case_1'].capitalize()}`""")
 
-    #     if st.checkbox('Показать слуг'):
-    #         deps_fig = utils.show_hbar(
-    #             dependants.index,
-    #             dependants.values,
-    #             title='Относительная частота слуг синтаксемы')
-    #         st.write(deps_fig)
+
 
 
 st.header(':mag_right:')
