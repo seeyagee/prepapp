@@ -52,11 +52,11 @@ if prep:
     st.markdown(f"""
             ##\n## __Паспорт предлога__ `{prep.upper()}`\n##""")
 
-    if base_prep[prep]['variants']:
-
-        st.markdown(f"""
-                __Варианты:__ {", ".join(
-                    [f'`{p.upper()}`' for p in  base_prep[prep]['variants']])+hrule}""")
+    variants = ", ".join(
+                    [f'`{p.upper()}`' for p in  base_prep[prep]['variants']])
+    variants = variants or 'Нет'
+    st.markdown(f"""
+            __Варианты:__ {variants+hrule}""")
 
     st.markdown(f"""
             __Тип__: `{base_prep[prep]['kind']}`{hrule}""")
@@ -69,59 +69,69 @@ if prep:
             __Значения:__{", ".join(
                     [f'`{l}`' for l in prep_df.label.unique()])}\n##""")
 
-    if len(prep_df):
-        if st.checkbox(
-                'Подробнее о значениях'):
-            for l in prep_labels:
-                with st.beta_expander(f'{l}'):
+    if len(prep_df) and st.checkbox('Подробнее о значениях'):
 
-                    short_df = synt_df[(synt_df.prep == prep) & (synt_df.label == l)]
-                    definitions = label_definitions[l].split(';')
+        for l in prep_labels:
+            with st.beta_expander(f'{l}'):
 
-                    for d in definitions:
-                        st.write(f'- {d.capitalize()}')
+                short_df = synt_df[(synt_df.prep == prep) & (synt_df.label == l)]
+                definitions = label_definitions[l].split(';')
+
+                for d in definitions:
+                    st.write(f'- {d.capitalize()}')
+                st.write(
+                    '###\n## Примеры: ')
+
+                for _, row in short_df.iterrows():
                     st.write(
-                        '###\n## Примеры: ')
+                        f'### {row.case} падеж:')
 
-                    for _, row in short_df.iterrows():
-                        st.write(
-                            f'### {row.case} падеж:')
+                    for ex in row.examples.split(','):
+                        st.write(f'*{ex.strip()}*\n')
 
-                        for ex in row.examples.split(','):
-                            st.write(f'*{ex.strip()}*\n')
-
-    if 'motive' in base_prep[prep]:
-        st.markdown(f"""
-                {hrule}\n__Мотивирующее слово__: `{base_prep[prep]['motive']}`""")
+    motive = base_prep[prep].get('motive', 'Нет')
+    if motive != 'Нет':
+        motive = f'`{motive}`'
+    st.markdown(f"""
+            {hrule}\n__Мотивирующее слово__: {motive}""")
 
 
     for ent in 'Синонимы', 'Антонимы':
         df = semantic_df[ent]
         df = df[df['prep_1'] == prep]
-        if len(df):
+        if not len(df):
             st.markdown(f"""
-                    {hrule}\n__{ent}__:\n\n""")
-            with st.beta_expander(f'Показать {ent.lower()}:'):
-                for label in df.label.unique():
-                    sem_group = df[df.label == label]
+                {hrule}\n__{ent}__:  Нет""")
+            continue
+        st.markdown(f"""
+            {hrule}\n__{ent}__:\n\n""")
+        with st.beta_expander(f'Показать {ent.lower()}:'):
+            for label in df.label.unique():
+                sem_group = df[df.label == label]
+                st.markdown(f"""
+                        \n- __{label}__\n""")
+                for _, row in sem_group.iterrows():
                     st.markdown(f"""
-                            \n- __{label}__\n""")
-                    for _, row in sem_group.iterrows():
-                        st.markdown(f"""
-                            `{row['prep_2'].upper()}` + `{row['case_2'].capitalize()}` ⸻ \
-                            `{row['prep_1'].upper()}` + `{row['case_1'].capitalize()}`""")
+                        `{row['prep_2'].upper()}` + `{row['case_2'].capitalize()}` ⸻ \
+                        `{row['prep_1'].upper()}` + `{row['case_1'].capitalize()}`""")
 
+    idioms = base_prep[prep]['idiom']
+    if not len(idioms):
+        st.markdown(f"""
+                {hrule}\n__Идиомы__:  Нет""")
     if len(base_prep[prep]['idiom']):
         st.markdown(f"""
-                    {hrule}\n__Идиомы__:\n\n""")
+                {hrule}\n__Идиомы__:\n\n""")
         with st.beta_expander(f'Показать идиомы:'):
             for idiom in base_prep[prep]['idiom']:
                 st.markdown(f'- {idiom.capitalize()}')
 
     st.markdown(f"""
             {hrule}\n__Источники:__\n\n""")
-    for source in base_prep[prep]['source']:
-        st.markdown(f'- {source}')
+    with st.beta_expander(f'Показать источники:'):
+        for source in base_prep[prep]['source']:
+            st.markdown(f'- {source}')
+    st.markdown(hrule)
 
 
 st.header(':mag_right:')
