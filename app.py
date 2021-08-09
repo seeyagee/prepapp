@@ -30,13 +30,15 @@ def load_data():
                 'static/synonyms.csv'),
             'Антонимы': pd.read_csv(
                 'static/antonyms.csv')}
+    formatter = json.loads(
+            open('static/format.json').read())
     return phras_df, synt_df, label_definitions, \
-           base_prep, semantic_df
+           base_prep, semantic_df, formatter
 
 st.title('Предложные конструкции в русском языке')
 st.write('Место для вступительного слова по проекту')
 
-phras_df, synt_df, label_definitions, base_prep, semantic_df = load_data()
+phras_df, synt_df, label_definitions, base_prep, semantic_df, formatter = load_data()
 
 all_preps = sorted(base_prep.keys(), key=len)
 
@@ -129,7 +131,7 @@ if prep:
             {hrule}\n__Источники:__\n\n""")
     with st.expander(f'Показать источники:'):
         for source in base_prep[prep]['source']:
-            st.markdown(f'- {source}')
+            st.markdown(f'- {formatter.get(source, source)}')
     st.markdown(hrule)
 
 
@@ -145,8 +147,9 @@ with st.expander(
     for col in query_values:
 
         query[col] = st.multiselect(
-                    col,
-                    sorted(phras_df[col].unique().tolist()))
+                formatter.get(col, col),
+                sorted(phras_df[col].unique().tolist()),
+                )
     
     if st.checkbox(
             'Показать таблицу'):

@@ -12,7 +12,7 @@ dawg-python==0.7.1
 spacy-legacy==3.0.0
 srsly==2.4.0
 wasabi==0.8.1
-pydantic==1.7.1
+pydantic>=1.7.4
 tqdm
 thinc
 pathy
