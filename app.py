@@ -9,7 +9,7 @@ import json
 @st.cache(allow_output_mutation=True)
 def load_models():
     extractor = models.Extractor(
-        model='ru_core_news_sm')
+        model='static/ru_core_news_sm/ru_core_news_sm-3.0.0')
     classifier = models.Classifier(
         model='static/classifier.pkl',
         vectorizer='static/ft_freqprune_100K_20K_pq_100.bin')
@@ -94,7 +94,6 @@ if prep:
         motive = f'`{motive}`'
     st.markdown(f"""
             {hrule}\n__Мотивирующее слово__: {motive}""")
-
 
     for ent in 'Синонимы', 'Антонимы':
         df = semantic_df[ent]

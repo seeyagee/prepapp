@@ -2,6 +2,6 @@ streamlit
 pandas
 numpy
 matplotlib
-spacy
+spacy==3.0.0
 compress-fasttext
 sklearn
