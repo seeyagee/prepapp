@@ -72,7 +72,7 @@ if prep:
     if len(prep_df) and st.checkbox('Подробнее о значениях'):
 
         for l in prep_labels:
-            with st.beta_expander(f'{l}'):
+            with st.expander(f'{l}'):
 
                 short_df = synt_df[(synt_df.prep == prep) & (synt_df.label == l)]
                 definitions = label_definitions[l].split(';')
