@@ -104,7 +104,7 @@ if prep:
             continue
         st.markdown(f"""
             {hrule}\n__{ent}__:\n\n""")
-        with st.beta_expander(f'Показать {ent.lower()}:'):
+        with st.expander(f'Показать {ent.lower()}:'):
             for label in df.label.unique():
                 sem_group = df[df.label == label]
                 st.markdown(f"""
@@ -121,20 +121,20 @@ if prep:
     if len(base_prep[prep]['idiom']):
         st.markdown(f"""
                 {hrule}\n__Идиомы__:\n\n""")
-        with st.beta_expander(f'Показать идиомы:'):
+        with st.expander(f'Показать идиомы:'):
             for idiom in base_prep[prep]['idiom']:
                 st.markdown(f'- {idiom.capitalize()}')
 
     st.markdown(f"""
             {hrule}\n__Источники:__\n\n""")
-    with st.beta_expander(f'Показать источники:'):
+    with st.expander(f'Показать источники:'):
         for source in base_prep[prep]['source']:
             st.markdown(f'- {source}')
     st.markdown(hrule)
 
 
 st.header(':mag_right:')
-with st.beta_expander(
+with st.expander(
             'Сформировать запрос в банк предложных конструкций:'):
     query = {}
 
