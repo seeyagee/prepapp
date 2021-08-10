@@ -49,7 +49,7 @@ formatter, default = load_formatters()
 all_preps = sorted(base_prep.keys(), key=len)
 
 st.title('Предложные конструкции в русском языке')
-st.write(formatter['intro'])
+st.markdown(formatter['intro'])
 
 
 st.header(':book:')
@@ -144,27 +144,27 @@ if prep:
             st.markdown(f'- {formatter.get(source, source)}')
     st.markdown(hrule)
 
+st.markdown(formatter['goals_1'])
+st.markdown(formatter['goals_2'])
+st.markdown(formatter['query'])
 
 st.header(':mag_right:')
 with st.expander(
             'Нажмите, чтобы сформировать запрос в Банк предложных конструкций'):
-    query = {}
+    example = st.checkbox('Пример')
+    with st.form(key='query'):
+        query = {}
 
-    query_values = (
-        'prep', 'label', 'dependant_lemma', 'dependant_case',
-        'dependant_pos', 'host_lemma', 'host_pos')
+        for col in default['query_values']:
+            d = default[col] if example else None
+            query[col] = st.multiselect(
+                    label=formatter.get(col, col),
+                    options=sorted(phras_df[col].unique().tolist()),
+                    default=d
+                    )
+        submit = st.form_submit_button(label='Искать')
 
-    for col in query_values:
-
-        query[col] = st.multiselect(
-                label=formatter.get(col, col),
-                options=sorted(phras_df[col].unique().tolist()),
-                default=default[col]
-                )
-
-    if st.button(
-            'Искать'):
-
+    if submit:
         query  = ' and '.join(
             f'{key} in {val}' for key, val in query.items()
             if len(val))
@@ -177,32 +177,35 @@ with st.expander(
             'Cкачать')
         st.markdown(tmp_link, unsafe_allow_html=True)
 
+st.markdown(formatter['text_area'])
 
 st.header(':pencil:')
-text = st.text_area(label='Введите текст, чтобы извлечь предложные конструкции',
-                    value=default["text_value"],
-                    max_chars=default["text_max_chars"],
-                    help=f'Введите текст длиной до {default["text_max_chars"]} символов и нажмите "Извлечь", чтобы получить список предложных конструкций из текста и их значений.',
-                    height=200)
+with st.form(key='extraction'):
+    text = st.text_area(label='Введите текст, чтобы извлечь предложные конструкции',
+                        value=default["text_value"],
+                        max_chars=default["text_max_chars"],
+                        help=f'Введите текст длиной до {default["text_max_chars"]} символов и нажмите "Извлечь", чтобы получить список предложных конструкций из текста и их значений.',
+                        height=200)
+    extract = st.form_submit_button(label='Извлечь')
+    if extract:
+        extractor, classifier = load_models()
+        pphrase_gen = extractor.parse(text)
+        st.markdown('#### Найденные конструкции:')
+        for elem in pphrase_gen:
+            text = utils.preprocess(elem)
+            label = classifier.predict(text)[0]
 
-extractor, classifier = load_models()
+            # TODO needs model retraining to remove this hack
+            if label == 'каузатор':
+                label = 'каузатив'
+            elif label == 'квалитатив':
+                label = 'квалификатив'
 
-if st.button('Извлечь') or text:
-    pphrase_gen = extractor.parse(text)
-    st.markdown('#### Найденные конструкции:')
-    for elem in pphrase_gen:
-        text = utils.preprocess(elem)
-        label = classifier.predict(text)[0]
+            pphrase = elem['prep'].lower() + ' ' + elem['dependant']
+            if elem['host'] is not None:
+                pphrase = elem['host'] + ' ' + pphrase
+            pphrase = (pphrase[:1].upper() + pphrase[1:]).strip()
 
-        # TODO needs model retraining to remove this hack
-        if label == 'каузатор':
-            label = 'каузатив'
-        elif label == 'квалитатив':
-            label = 'квалификатив'
+            st.markdown(f"{pphrase} ⸻ `{label}`")
 
-        pphrase = elem['prep'].lower() + ' ' + elem['dependant']
-        if elem['host'] is not None:
-            pphrase = elem['host'] + ' ' + pphrase
-        pphrase = (pphrase[:1].upper() + pphrase[1:]).strip()
-        
-        st.markdown(f"{pphrase} ⸻ `{label}`")
+st.markdown(formatter['outro'])
