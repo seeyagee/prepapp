@@ -30,21 +30,31 @@ def load_data():
                 'static/synonyms.csv'),
             'Антонимы': pd.read_csv(
                 'static/antonyms.csv')}
+
+    return phras_df, synt_df, label_definitions, \
+           base_prep, semantic_df
+
+@st.cache()
+def load_formatters():
     formatter = json.loads(
             open('static/format.json').read())
-    return phras_df, synt_df, label_definitions, \
-           base_prep, semantic_df, formatter
+    default = json.loads(
+            open('static/default.json').read())
+    return formatter, default
 
-st.title('Предложные конструкции в русском языке')
-st.write('Место для вступительного слова по проекту')
 
-phras_df, synt_df, label_definitions, base_prep, semantic_df, formatter = load_data()
+phras_df, synt_df, label_definitions, base_prep, semantic_df = load_data()
+formatter, default = load_formatters()
 
 all_preps = sorted(base_prep.keys(), key=len)
 
+st.title('Предложные конструкции в русском языке')
+st.write(formatter['intro'])
+
+
 st.header(':book:')
 prep = st.selectbox(
-    'Выберите предлог, чтобы узнать больше',
+    'Выберите предлог из списка, чтобы просмотреть его паспорт',
     ['']+all_preps)
 
 if prep:
@@ -137,7 +147,7 @@ if prep:
 
 st.header(':mag_right:')
 with st.expander(
-            'Сформировать запрос в банк предложных конструкций:'):
+            'Нажмите, чтобы сформировать запрос в Банк предложных конструкций'):
     query = {}
 
     query_values = (
@@ -147,12 +157,13 @@ with st.expander(
     for col in query_values:
 
         query[col] = st.multiselect(
-                formatter.get(col, col),
-                sorted(phras_df[col].unique().tolist()),
+                label=formatter.get(col, col),
+                options=sorted(phras_df[col].unique().tolist()),
+                default=default[col]
                 )
-    
-    if st.checkbox(
-            'Показать таблицу'):
+
+    if st.button(
+            'Искать'):
 
         query  = ' and '.join(
             f'{key} in {val}' for key, val in query.items()
@@ -168,9 +179,11 @@ with st.expander(
 
 
 st.header(':pencil:')
-text = st.text_area(label='Извлечь конструкции из своего текста:',
-                    max_chars=400,
-                    help='Введите текст. Например, "Мероприятие в честь выпуска выпадает на субботу"')
+text = st.text_area(label='Введите текст, чтобы извлечь предложные конструкции',
+                    value=default["text_value"],
+                    max_chars=default["text_max_chars"],
+                    help=f'Введите текст длиной до {default["text_max_chars"]} символов и нажмите "Извлечь", чтобы получить список предложных конструкций из текста и их значений.',
+                    height=200)
 
 extractor, classifier = load_models()
 
