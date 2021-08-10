@@ -6,6 +6,8 @@ import models
 import json
 
 
+st.set_page_config(page_title='Предлоги в русском языке')
+
 @st.cache(allow_output_mutation=True)
 def load_models():
     extractor = models.Extractor(
