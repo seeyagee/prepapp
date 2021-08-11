@@ -1,1 +1,1 @@
-web: sh setup.sh && python3 -m spacy download ru_core_news_sm && streamlit run app.py
+web: sh setup.sh && streamlit run app.py

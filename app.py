@@ -6,10 +6,12 @@ import models
 import json
 
 
+st.set_page_config(page_title='Предлоги в русском языке')
+
 @st.cache(allow_output_mutation=True)
 def load_models():
     extractor = models.Extractor(
-        model='ru_core_news_sm')
+        model='static/ru_core_news_sm/ru_core_news_sm-3.0.0')
     classifier = models.Classifier(
         model='static/classifier.pkl',
         vectorizer='static/ft_freqprune_100K_20K_pq_100.bin')
@@ -25,18 +27,36 @@ def load_data():
             open('static/base_prep.json').read())
     label_definitions = json.loads(
             open('static/definitions.json').read())
-    return phras_df, synt_df, label_definitions, base_prep
+    semantic_df = {
+            'Синонимы': pd.read_csv(
+                'static/synonyms.csv'),
+            'Антонимы': pd.read_csv(
+                'static/antonyms.csv')}
 
-st.title('Предложные конструкции в русском языке')
-st.write('Место для вступительного слова по проекту')
+    return phras_df, synt_df, label_definitions, \
+           base_prep, semantic_df
 
-phras_df, synt_df, label_definitions, base_prep = load_data()
+@st.cache()
+def load_formatters():
+    formatter = json.loads(
+            open('static/format.json').read())
+    default = json.loads(
+            open('static/default.json').read())
+    return formatter, default
+
+
+phras_df, synt_df, label_definitions, base_prep, semantic_df = load_data()
+formatter, default = load_formatters()
 
 all_preps = sorted(base_prep.keys(), key=len)
 
+st.title('Предложные конструкции в русском языке')
+st.markdown(formatter['intro'])
+
+
 st.header(':book:')
 prep = st.selectbox(
-    'Выберите предлог, чтобы узнать больше',
+    'Выберите предлог из списка, чтобы просмотреть его паспорт',
     ['']+all_preps)
 
 if prep:
@@ -46,11 +66,11 @@ if prep:
     st.markdown(f"""
             ##\n## __Паспорт предлога__ `{prep.upper()}`\n##""")
 
-    if base_prep[prep]['variants']:
-
-        st.markdown(f"""
-                __Варианты:__ {", ".join(
-                    [f'`{p.upper()}`' for p in  base_prep[prep]['variants']])+hrule}""")
+    variants = ", ".join(
+                    [f'`{p.upper()}`' for p in  base_prep[prep]['variants']])
+    variants = variants or 'Нет'
+    st.markdown(f"""
+            __Варианты:__ {variants+hrule}""")
 
     st.markdown(f"""
             __Тип__: `{base_prep[prep]['kind']}`{hrule}""")
@@ -63,73 +83,90 @@ if prep:
             __Значения:__{", ".join(
                     [f'`{l}`' for l in prep_df.label.unique()])}\n##""")
 
-    if len(prep_df):
-        if st.checkbox(
-                'Подробнее о значениях'):
-            for l in prep_labels:
-                with st.beta_expander(f'{l}'):
+    if len(prep_df) and st.checkbox('Подробнее о значениях'):
 
-                    short_df = synt_df[(synt_df.prep == prep) & (synt_df.label == l)]
-                    definitions = label_definitions[l].split(';')
+        for l in prep_labels:
+            with st.expander(f'{l}'):
 
-                    for d in definitions:
-                        st.write(f'- {d.capitalize()}')
+                short_df = synt_df[(synt_df.prep == prep) & (synt_df.label == l)]
+                definitions = label_definitions[l].split(';')
+
+                for d in definitions:
+                    st.write(f'- {d.capitalize()}')
+                st.write(
+                    '###\n## Примеры: ')
+
+                for _, row in short_df.iterrows():
                     st.write(
-                        '###\n## Примеры: ')
+                        f'### {row.case} падеж:')
 
-                    for _, row in short_df.iterrows():
-                        st.write(
-                            f'### {row.case} падеж:')
+                    for ex in row.examples.split(','):
+                        st.write(f'*{ex.strip()}*\n')
 
-                        for ex in row.examples.split(','):
-                            st.write(f'*{ex.strip()}*\n')
+    motive = base_prep[prep].get('motive', 'Нет')
+    if motive != 'Нет':
+        motive = f'`{motive}`'
+    st.markdown(f"""
+            {hrule}\n__Мотивирующее слово__: {motive}""")
 
-    if 'motive' in base_prep[prep]:
+    for ent in 'Синонимы', 'Антонимы':
+        df = semantic_df[ent]
+        df = df[df['prep_1'] == prep]
+        if not len(df):
+            st.markdown(f"""
+                {hrule}\n__{ent}__:  Нет""")
+            continue
         st.markdown(f"""
-                {hrule}\n__Мотивирующее слово__: `{base_prep[prep]['motive']}`""")
+            {hrule}\n__{ent}__:\n\n""")
+        with st.expander(f'Показать {ent.lower()}:'):
+            for label in df.label.unique():
+                sem_group = df[df.label == label]
+                st.markdown(f"""
+                        \n- __{label}__\n""")
+                for _, row in sem_group.iterrows():
+                    st.markdown(f"""
+                        `{row['prep_2'].upper()}` + `{row['case_2'].capitalize()}` ⸻ \
+                        `{row['prep_1'].upper()}` + `{row['case_1'].capitalize()}`""")
 
-    # label = st.selectbox(
-    #     'Выберите значение',
-    #     [''] + prep_labels)
+    idioms = base_prep[prep]['idiom']
+    if not len(idioms):
+        st.markdown(f"""
+                {hrule}\n__Идиомы__:  Нет""")
+    if len(base_prep[prep]['idiom']):
+        st.markdown(f"""
+                {hrule}\n__Идиомы__:\n\n""")
+        with st.expander(f'Показать идиомы:'):
+            for idiom in base_prep[prep]['idiom']:
+                st.markdown(f'- {idiom.capitalize()}')
 
-    # if label:
-    #     pl_df = phras_df[(phras_df.label == label.lower()) & (phras_df.prep == prep)]
-    #     hosts = pl_df.host_lemma.value_counts().head(10)
-    #     dependants = pl_df.dependant_lemma.value_counts().head(10)
-        
-    #     if st.checkbox('Показать хозяев'):
-    #         hosts_fig = utils.show_hbar(
-    #             hosts.index,
-    #             hosts.values,
-    #             title='Относительная частота хозяев синтаксемы')
-    #         st.write(hosts_fig)
+    st.markdown(f"""
+            {hrule}\n__Источники:__\n\n""")
+    with st.expander(f'Показать источники:'):
+        for source in base_prep[prep]['source']:
+            st.markdown(f'- {formatter.get(source, source)}')
+    st.markdown(hrule)
 
-    #     if st.checkbox('Показать слуг'):
-    #         deps_fig = utils.show_hbar(
-    #             dependants.index,
-    #             dependants.values,
-    #             title='Относительная частота слуг синтаксемы')
-    #         st.write(deps_fig)
-
+st.markdown(formatter['goals_1'])
+st.markdown(formatter['goals_2'])
+st.markdown(formatter['query'])
 
 st.header(':mag_right:')
-with st.beta_expander(
-            'Сформировать запрос в банк предложных конструкций:'):
-    query = {}
+with st.expander(
+            'Нажмите, чтобы сформировать запрос в Банк предложных конструкций'):
+    example = st.checkbox('Пример')
+    with st.form(key='query'):
+        query = {}
 
-    query_values = (
-        'prep', 'label', 'dependant_lemma', 'dependant_case',
-        'dependant_pos', 'host_lemma', 'host_pos')
+        for col in default['query_values']:
+            d = default[col] if example else None
+            query[col] = st.multiselect(
+                    label=formatter.get(col, col),
+                    options=sorted(phras_df[col].unique().tolist()),
+                    default=d
+                    )
+        submit = st.form_submit_button(label='Искать')
 
-    for col in query_values:
-
-        query[col] = st.multiselect(
-                    col,
-                    sorted(phras_df[col].unique().tolist()))
-    
-    if st.checkbox(
-            'Показать таблицу'):
-
+    if submit:
         query  = ' and '.join(
             f'{key} in {val}' for key, val in query.items()
             if len(val))
@@ -142,30 +179,35 @@ with st.beta_expander(
             'Cкачать')
         st.markdown(tmp_link, unsafe_allow_html=True)
 
+st.markdown(formatter['text_area'])
 
 st.header(':pencil:')
-text = st.text_area(label='Извлечь конструкции из своего текста:',
-                    max_chars=400,
-                    help='Введите текст. Например, "Мероприятие в честь выпуска выпадает на субботу"')
+with st.form(key='extraction'):
+    text = st.text_area(label='Введите текст, чтобы извлечь предложные конструкции',
+                        value=default["text_value"],
+                        max_chars=default["text_max_chars"],
+                        help=f'Введите текст длиной до {default["text_max_chars"]} символов и нажмите "Извлечь", чтобы получить список предложных конструкций из текста и их значений.',
+                        height=200)
+    extract = st.form_submit_button(label='Извлечь')
+    if extract:
+        extractor, classifier = load_models()
+        pphrase_gen = extractor.parse(text)
+        st.markdown('#### Найденные конструкции:')
+        for elem in pphrase_gen:
+            text = utils.preprocess(elem)
+            label = classifier.predict(text)[0]
 
-extractor, classifier = load_models()
+            # TODO needs model retraining to remove this hack
+            if label == 'каузатор':
+                label = 'каузатив'
+            elif label == 'квалитатив':
+                label = 'квалификатив'
 
-if st.button('Извлечь') or text:
-    pphrase_gen = extractor.parse(text)
-    st.markdown('#### Найденные конструкции:')
-    for elem in pphrase_gen:
-        text = utils.preprocess(elem)
-        label = classifier.predict(text)[0]
+            pphrase = elem['prep'].lower() + ' ' + elem['dependant']
+            if elem['host'] is not None:
+                pphrase = elem['host'] + ' ' + pphrase
+            pphrase = (pphrase[:1].upper() + pphrase[1:]).strip()
 
-        # TODO needs model retraining to remove this hack
-        if label == 'каузатор':
-            label = 'каузатив'
-        elif label == 'квалитатив':
-            label = 'квалификатив'
+            st.markdown(f"{pphrase} ⸻ `{label}`")
 
-        pphrase = elem['prep'].lower() + ' ' + elem['dependant']
-        if elem['host'] is not None:
-            pphrase = elem['host'] + ' ' + pphrase
-        pphrase = (pphrase[:1].upper() + pphrase[1:]).strip()
-        
-        st.markdown(f"{pphrase} ⸻ `{label}`")
+st.markdown(formatter['outro'])
