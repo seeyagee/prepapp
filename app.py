@@ -37,7 +37,7 @@ def load_data():
            base_prep, semantic_df
 
 @st.cache()
-def load_formatters():
+def load_configs():
     formatter = json.loads(
             open('static/format.json').read())
     default = json.loads(
@@ -46,7 +46,7 @@ def load_formatters():
 
 
 phras_df, synt_df, label_definitions, base_prep, semantic_df = load_data()
-formatter, default = load_formatters()
+formatter, default = load_configs()
 
 all_preps = sorted(base_prep.keys(), key=len)
 
@@ -88,7 +88,7 @@ if prep:
         for l in prep_labels:
             with st.expander(f'{l}'):
 
-                short_df = synt_df[(synt_df.prep == prep) & (synt_df.label == l)]
+                short_df = prep_df[(prep_df.label == l)]
                 definitions = label_definitions[l].split(';')
 
                 for d in definitions:
