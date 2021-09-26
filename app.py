@@ -4,9 +4,8 @@ import utils
 from utils import hrule
 import models
 import json
-
-
 st.set_page_config(page_title='Предлоги в русском языке')
+
 
 @st.cache(allow_output_mutation=True)
 def load_models():
@@ -17,10 +16,11 @@ def load_models():
         vectorizer='static/ft_freqprune_100K_20K_pq_100.bin')
     return extractor, classifier
 
+
 @st.cache()
 def load_data():
     phras_df = pd.read_csv(
-            'static/prep_phrases_gold.csv')
+            'static/prep_phrases_db.csv')
     synt_df = pd.read_csv(
             'static/syntaxemes.csv')
     base_prep = json.loads(
@@ -35,6 +35,7 @@ def load_data():
 
     return phras_df, synt_df, label_definitions, \
            base_prep, semantic_df
+
 
 @st.cache()
 def load_configs():
@@ -57,7 +58,7 @@ st.markdown(formatter['intro'])
 st.header(':book:')
 prep = st.selectbox(
     'Выберите предлог из списка, чтобы просмотреть его паспорт',
-    ['']+all_preps)
+    all_preps)
 
 if prep:
     prep_df = synt_df[synt_df.prep == prep]
@@ -67,7 +68,7 @@ if prep:
             ##\n## __Паспорт предлога__ `{prep.upper()}`\n##""")
 
     variants = ", ".join(
-                    [f'`{p.upper()}`' for p in  base_prep[prep]['variants']])
+                    [f'`{p.upper()}`' for p in base_prep[prep]['variants']])
     variants = variants or 'Нет'
     st.markdown(f"""
             __Варианты:__ {variants+hrule}""")
@@ -103,6 +104,22 @@ if prep:
                     for ex in row.examples.split(','):
                         st.write(f'*{ex.strip()}*\n')
 
+    #Тут про стиль предлога
+
+    typical_style = base_prep[prep]['style']['typical']
+    non_typical_style = base_prep[prep]['style']['non-typical']
+    if typical_style or non_typical_style:
+        if typical_style[0] == 'общеупотребимый':
+            st.markdown(f"""
+                {hrule}\n__Стиль__: `Общеупотребимый`""")
+        else:
+            st.markdown(f"""
+                {hrule}\n__Стиль__: """)
+            st.markdown(f"""
+                    Типичный: {", ".join([f'`{s}`' for s in typical_style])}""")
+            st.markdown(f"""
+                    Нетипичный: {", ".join([f'`{s}`' for s in non_typical_style])}""")
+
     motive = base_prep[prep].get('motive', 'Нет')
     if motive != 'Нет':
         motive = f'`{motive}`'
@@ -135,13 +152,13 @@ if prep:
     if len(base_prep[prep]['idiom']):
         st.markdown(f"""
                 {hrule}\n__Идиомы__:\n\n""")
-        with st.expander(f'Показать идиомы:'):
+        with st.expander('Показать идиомы:'):
             for idiom in base_prep[prep]['idiom']:
                 st.markdown(f'- {idiom.capitalize()}')
 
     st.markdown(f"""
             {hrule}\n__Источники:__\n\n""")
-    with st.expander(f'Показать источники:'):
+    with st.expander('Показать источники:'):
         for source in base_prep[prep]['source']:
             st.markdown(f'- {formatter.get(source, source)}')
     st.markdown(hrule)
@@ -167,11 +184,11 @@ with st.expander(
         submit = st.form_submit_button(label='Искать')
 
     if submit:
-        query  = ' and '.join(
+        query = ' and '.join(
             f'{key} in {val}' for key, val in query.items()
             if len(val))
         out_df = phras_df.query(query) if query else phras_df
-        st.write(out_df[['phrase', 'label', 'host', 'prep', 'dependant']])
+        st.write(out_df[['phrase', 'label', 'host', 'prep', 'dependant', 'corpus']])
 
         tmp_link = utils.get_table_download_button(
             out_df,
@@ -211,3 +228,5 @@ with st.form(key='extraction'):
             st.markdown(f"{pphrase} ⸻ `{label}`")
 
 st.markdown(formatter['outro'])
+st.markdown(hrule)
+st.markdown(formatter['credits'])

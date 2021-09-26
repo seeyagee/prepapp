@@ -71,5 +71,4 @@ def get_table_download_button(df, filename, linktext):
                 }}
         </style> """
 
-
     return custom_css + href

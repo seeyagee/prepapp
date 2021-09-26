@@ -2,8 +2,6 @@ from compress_fasttext.models import CompressedFastTextKeyedVectors
 import spacy
 import pickle
 import numpy as np
-from collections import namedtuple
-import streamlit as st
 
 
 class Extractor():

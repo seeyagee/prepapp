@@ -1,5 +1,5 @@
 {
-    "query_values": ["prep", "label", "dependant_lemma", "dependant_case", "dependant_pos", "host_lemma", "host_pos"],
+    "query_values": ["prep", "label", "dependant_lemma", "dependant_case", "dependant_pos", "host_lemma", "host_pos", "corpus"],
     "prep": ["в"],
     "label": ["локатив"],
     "dependant_pos": ["NOUN"],
