@@ -1,8 +1,6 @@
-import matplotlib.pyplot as plt
-import numpy as np
+# import matplotlib.pyplot as plt
+# import numpy as np
 import base64
-import re
-import uuid
 
 
 hrule = '\n_________________'
@@ -19,22 +17,22 @@ def preprocess(data: dict, dummy='что-то_NOUN'):
     return ' '.join([host, prep, dep])
 
 
-def show_hbar(names, values, title, kind='relative'):
+# def show_hbar(names, values, title, kind='relative'):
 
-    if kind == 'relative':
-        values = (values/ sum(values)).round(2)
+#     if kind == 'relative':
+#         values = (values/ sum(values)).round(2)
 
-    fig, ax = plt.subplots()
+#     fig, ax = plt.subplots()
 
-    y_pos = np.arange(len(values))
+#     y_pos = np.arange(len(values))
 
-    ax.barh(y_pos, values, align='center')
-    ax.set_yticks(y_pos)
-    ax.set_yticklabels(names)
-    ax.invert_yaxis()
-    ax.set_title(title)
+#     ax.barh(y_pos, values, align='center')
+#     ax.set_yticks(y_pos)
+#     ax.set_yticklabels(names)
+#     ax.invert_yaxis()
+#     ax.set_title(title)
 
-    return fig
+#     return fig
 
 
 def get_table_download_button(df, filename, linktext):
