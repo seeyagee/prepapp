@@ -4,6 +4,8 @@ import utils
 from utils import hrule
 import models
 import json
+import numpy as np
+
 st.set_page_config(page_title='Предлоги в русском языке')
 
 
@@ -137,6 +139,8 @@ if prep:
             {hrule}\n__{ent}__:\n\n""")
         with st.expander(f'Показать'):
             for label in df.label.unique():
+                if label is np.nan:
+                    continue
                 sem_group = df[df.label == label]
                 st.markdown(f"""
                         \n- __{label}__\n""")
