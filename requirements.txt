@@ -1,7 +1,7 @@
 streamlit
 pandas
 numpy
-spacy
+spacy==3.0.0
 compress-fasttext
 sklearn
 pymorphy2==0.9.1
