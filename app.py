@@ -106,8 +106,6 @@ if prep:
                     for ex in row.examples.split(','):
                         st.write(f'*{ex.strip().capitalize()}*\n')
 
-    #Тут про стиль предлога
-
     typical_style = base_prep[prep]['style']['typical']
     non_typical_style = base_prep[prep]['style']['non-typical']
     if typical_style or non_typical_style:
@@ -121,6 +119,9 @@ if prep:
                     Типичный: {", ".join([f'`{s}`' for s in typical_style])}""")
             st.markdown(f"""
                     Нетипичный: {", ".join([f'`{s}`' for s in non_typical_style])}""")
+    else:
+        st.markdown(f"""
+                {hrule}\n__Стиль__: Нет""")
 
     motive = base_prep[prep].get('motive', 'Нет')
     if motive != 'Нет':
