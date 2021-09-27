@@ -78,11 +78,11 @@ if prep:
 
     st.markdown(f"""
             __Падежи:__ {", ".join(
-                    [f'`{c}`' for c in base_prep[prep]['case']])+hrule}""")
+                    [f'`{formatter[c.lower()].capitalize()}`' for c in base_prep[prep]['case']])+hrule}""")
 
     st.markdown(f"""
             __Значения:__{", ".join(
-                    [f'`{l}`' for l in prep_df.label.unique()])}\n##""")
+                    [f'`{l.capitalize()}`' for l in prep_df.label.unique()])}\n##""")
 
     if len(prep_df) and st.checkbox('Подробнее о значениях'):
 
@@ -99,7 +99,7 @@ if prep:
 
                 for _, row in short_df.iterrows():
                     st.write(
-                        f'### {row.case} падеж:')
+                        f'### {formatter[row.case.lower()].capitalize()} падеж:')
 
                     for ex in row.examples.split(','):
                         st.write(f'*{ex.strip().capitalize()}*\n')
