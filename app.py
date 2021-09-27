@@ -144,7 +144,7 @@ if prep:
                     continue
                 sem_group = df[df.label == label]
                 st.markdown(f"""
-                        \n- __{label}__\n""")
+                        \n- __{label.capitalize()}__\n""")
                 for _, row in sem_group.iterrows():
                     st.markdown(f"""
                         `{row['prep_2'].upper()}` + `{row['case_2'].capitalize()}` ⸻ \
