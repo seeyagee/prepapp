@@ -93,7 +93,7 @@ if prep:
                 definitions = label_definitions[l].split(';')
 
                 for d in definitions:
-                    st.write(f'- {d.capitalize()}')
+                    st.write(f'- {d.lower()}')
                 st.write(
                     '###\n## Примеры: ')
 
@@ -102,7 +102,7 @@ if prep:
                         f'### {row.case} падеж:')
 
                     for ex in row.examples.split(','):
-                        st.write(f'*{ex.strip()}*\n')
+                        st.write(f'*{ex.strip().capitalize()}*\n')
 
     #Тут про стиль предлога
 
@@ -228,5 +228,4 @@ with st.form(key='extraction'):
             st.markdown(f"{pphrase} ⸻ `{label}`")
 
 st.markdown(formatter['outro'])
-st.markdown(hrule)
 st.markdown(formatter['credits'])
